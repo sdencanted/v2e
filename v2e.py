@@ -816,6 +816,15 @@ def main():
                 # array to batch events for rendering to DVS frames
                 events = np.zeros((0, 4), dtype=np.float32)
 
+                # TODO: remove  after generating upsampled vids
+                
+                def ensure_dir(target_path):
+                    if not os.path.exists(target_path):
+                        os.makedirs(target_path)
+                ensure_dir(f"{os.path.dirname(input_file)}/rgb_interpolated/images")
+                os.system(f"cp -r {interpFramesFolder}/* {os.path.dirname(input_file)}/rgb_interpolated/images")
+                np.savetxt(f'{os.path.dirname(input_file)}/rgb_interpolated/timestamps.txt',interpTimes,fmt="%.32f")
+                # exit()
                 logger.info(
                     f'*** Stage 3/3: emulating DVS events from '
                     f'{nFrames} frames')

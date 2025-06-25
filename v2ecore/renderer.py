@@ -303,6 +303,7 @@ class EventRenderer(object):
             # accumulate event histograms to the current frame,
             # clip values of zero-centered current frame with new events added
             self.accumulate_event_frame(events, histrange)
+            # self.accumulate_event_frame_kronecker(events, histrange)
 
             # If not finished with current event_arr,
             # it means above we finished filling a frame, either with
@@ -323,6 +324,7 @@ class EventRenderer(object):
                     pass
 
                 # img output is 0-1 range
+                # img=self.currentFrame
                 img = normalize_frame(self.currentFrame, self.full_scale_count)
 
                 # done with this frame, allocate new one in next loop
@@ -398,3 +400,34 @@ class EventRenderer(object):
         self.currentFrame = np.clip(
             self.currentFrame + (img_on - img_off),
             -self.full_scale_count, self.full_scale_count)
+    def accumulate_event_frame_kronecker(self, events, histrange):
+        """Accumulate event frame from an array of events.
+
+        # Arguments
+        events: np.ndarray
+            an [N events x 4] array
+
+        # Returns
+        event_frame: np.ndarray
+            an event frame
+        """
+        img = hist2d_numba_seq(
+            np.array([events[:, 2], events[:, 1]],
+                     dtype=np.float64),
+            bins=np.asarray([self.height, self.width], dtype=np.int64),
+            ranges=histrange)
+
+
+        
+        # 90 percentile max 0 to 1
+        nonzero_mask=img != 0
+        nonzero_voxel = img[nonzero_mask]
+        if nonzero_voxel.size>0:
+            event_min=max(0,nonzero_voxel.min())
+            scale=1/ max(1,(np.quantile(nonzero_voxel,0.9)-event_min))
+        else:
+            event_min=0
+            scale=1
+        
+        # accumulate event histograms to the current frame
+        self.currentFrame = img*scale-event_min

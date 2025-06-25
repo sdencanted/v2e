@@ -80,7 +80,7 @@ def v2e_args(parser):
     # general arguments for output folder, overwriting, etc
     outGroupGeneral = parser.add_argument_group('Output: General')
     outGroupGeneral.add_argument(
-        "-o", "--output_folder", type=expandpath, default='v2e-output',
+        "-o", "--output_folder", type=expandpath, default='output/v2e-output',
         help="folder to store outputs.")
     outGroupGeneral.add_argument(
         "--avi_frame_rate", type=int, default=30,
